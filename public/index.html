@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Football Match Predictor — Historical Evidence Model</title>
+  <style>
+    /* ── Reset & tokens ────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0b0d12;
+      --surface:   #13161f;
+      --surface2:  #1b1f2e;
+      --surface3:  #222840;
+      --border:    #272d42;
+      --border2:   #323a55;
+      --accent:    #4f8ef7;
+      --accent2:   #7c5cd8;
+      --green:     #22c55e;
+      --green-dim: rgba(34,197,94,0.12);
+      --yellow:    #f59e0b;
+      --yellow-dim:rgba(245,158,11,0.12);
+      --red:       #ef4444;
+      --red-dim:   rgba(239,68,68,0.12);
+      --text:      #e2e8f4;
+      --text2:     #b0bace;
+      --muted:     #6b7694;
+      --radius:    10px;
+      --radius-sm: 6px;
+    }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; }
+
+    /* ── Shell layout ──────────────────────────────────────────────────────── */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-brand .brand-name {
+      font-size: 0.95rem; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-brand .brand-sub {
+      font-size: 0.72rem; color: var(--muted); margin-top: 2px;
+    }
+    .sidebar-nav { padding: 12px 8px; flex: 1; }
+    .nav-section-label {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); padding: 10px 8px 4px;
+    }
+    .nav-btn {
+      display: flex; align-items: center; gap: 9px;
+      width: 100%; padding: 8px 10px; border-radius: var(--radius-sm);
+      border: none; background: none; color: var(--text2);
+      font-size: 0.84rem; cursor: pointer; text-align: left;
+      transition: background 0.12s, color 0.12s;
+    }
+    .nav-btn:hover { background: var(--surface2); color: var(--text); }
+    .nav-btn.active { background: rgba(79,142,247,0.12); color: var(--accent); font-weight: 600; }
+    .nav-btn .nav-icon { font-size: 1rem; flex-shrink: 0; }
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 0.7rem; color: var(--muted); line-height: 1.5;
+    }
+
+    /* Main content */
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-size: 0.9rem; font-weight: 600; color: var(--text2); }
+    .topbar-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tb-badge {
+      font-size: 0.68rem; padding: 2px 8px; border-radius: 20px;
+      border: 1px solid var(--border2); color: var(--muted);
+      background: var(--surface2);
+    }
+    .tb-badge.live-no { border-color: rgba(245,158,11,0.3); color: var(--yellow); }
+    .content { padding: 24px; flex: 1; }
+
+    /* ── Pages (shown/hidden by JS) ────────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform:none; } }
+
+    /* ── Cards ─────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--muted);
+    }
+    .card-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Grid helpers ───────────────────────────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    /* ── Stat pill / chip ───────────────────────────────────────────────────── */
+    .stat-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+    }
+    .stat-chip .sc-val { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .stat-chip .sc-key { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+
+    /* ── Pill badges ────────────────────────────────────────────────────────── */
+    .pill {
+      display: inline-block; padding: 2px 9px; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 600;
+    }
+    .pill-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(34,197,94,0.25); }
+    .pill-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+    .pill-red    { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(239,68,68,0.25); }
+    .pill-blue   { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.25); }
+    .pill-muted  { background: var(--surface2);   color: var(--muted);  border: 1px solid var(--border); }
+
+    /* ── Form result dots ───────────────────────────────────────────────────── */
+    .form-dots { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+    .fd { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+    .fd-W { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(34,197,94,0.3); }
+    .fd-D { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+    .fd-L { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(239,68,68,0.3); }
+    .fd-? { background: var(--surface2);   color: var(--muted);  border: 1px solid var(--border); }
+
+    /* ── Inputs / selects ──────────────────────────────────────────────────── */
+    input[type="text"], input[type="date"], select {
+      width: 100%;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius-sm);
+      padding: 9px 12px; font-size: 0.88rem; font-family: inherit; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+    .field { margin-bottom: 14px; }
+    .autocomplete-wrap { position: relative; }
+    .dropdown-list {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); max-height: 180px; overflow-y: auto;
+      z-index: 200; display: none;
+    }
+    .dropdown-list.open { display: block; }
+    .dropdown-item {
+      padding: 8px 12px; cursor: pointer; font-size: 0.88rem;
+      transition: background 0.1s;
+    }
+    .dropdown-item:hover, .dropdown-item.focused { background: var(--surface2); color: var(--accent); }
+
+    /* ── Buttons ────────────────────────────────────────────────────────────── */
+    .btn-primary {
+      width: 100%; padding: 12px; border-radius: var(--radius-sm); border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-size: 0.93rem; font-weight: 700; cursor: pointer;
+      letter-spacing: 0.02em; transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); border-radius: var(--radius-sm);
+      padding: 7px 14px; cursor: pointer; font-size: 0.82rem;
+      transition: all 0.12s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-demo {
+      padding: 5px 11px; border-radius: var(--radius-sm);
+      background: var(--surface2); border: 1px solid var(--border2);
+      color: var(--text2); font-size: 0.78rem; cursor: pointer;
+      transition: all 0.12s; white-space: nowrap;
+    }
+    .btn-demo:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Pipeline ───────────────────────────────────────────────────────────── */
+    .pipeline-card { display: none; }
+    .pipeline-card.visible { display: block; }
+    .pipeline-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .pipeline-row:last-child { border-bottom: none; }
+    .agent-icon {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; flex-shrink: 0;
+    }
+    .agent-icon.running { border-color: var(--accent); animation: pulse 1.2s infinite; }
+    .agent-icon.done    { border-color: var(--green);  background: var(--green-dim); }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(79,142,247,0.4);}50%{box-shadow:0 0 0 6px rgba(79,142,247,0);} }
+    .agent-info { flex: 1; }
+    .agent-name   { font-size: 0.84rem; font-weight: 600; }
+    .agent-status { font-size: 0.74rem; color: var(--muted); }
+    .agent-tick   { color: var(--green); display: none; }
+    .agent-tick.show { display: block; }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    .spinner.show { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Probability bar ─────────────────────────────────────────────────────── */
+    .prob-header { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-bottom: 7px; }
+    .prob-track { display: flex; height: 40px; border-radius: var(--radius-sm); overflow: hidden; gap: 2px; }
+    .prob-seg { display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; transition: width 0.7s ease; min-width: 0; }
+    .prob-seg.home { background: linear-gradient(90deg, var(--accent), #3a7be0); color: #fff; }
+    .prob-seg.draw { background: var(--surface3); color: var(--muted); }
+    .prob-seg.away { background: linear-gradient(90deg, var(--accent2), #a855f7); color: #fff; }
+    .prob-legend { display: flex; justify-content: space-between; margin-top: 7px; font-size: 0.76rem; }
+    .prob-legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    /* ── Winner banner ──────────────────────────────────────────────────────── */
+    .winner-banner {
+      text-align: center; padding: 16px 0 10px;
+      border-bottom: 1px solid var(--border); margin-bottom: 18px;
+    }
+    .fixture-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+    .winner-chip {
+      display: inline-block; padding: 5px 18px; border-radius: 20px;
+      font-size: 0.88rem; font-weight: 700;
+      background: linear-gradient(135deg, rgba(79,142,247,0.2), rgba(124,92,216,0.2));
+      border: 1px solid var(--accent); color: var(--accent);
+    }
+    .winner-chip.uncertain {
+      background: var(--yellow-dim); border-color: var(--yellow); color: var(--yellow);
+    }
+    .conf-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .conf-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+    .conf-pill.High   { background: var(--green-dim);  color: var(--green); }
+    .conf-pill.Medium { background: var(--yellow-dim); color: var(--yellow); }
+    .conf-pill.Low    { background: var(--red-dim);    color: var(--red); }
+    .conf-pill.Insufficient { background: var(--surface2); color: var(--muted); }
+    .conf-score { font-size: 0.7rem; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px; }
+
+    /* ── xG chips ────────────────────────────────────────────────────────────── */
+    .xg-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .xg-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 6px 12px; font-size: 0.78rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .xg-chip .xl { color: var(--muted); }
+    .xg-chip .xv { font-weight: 700; }
+    .xg-chip .xm { font-size: 0.64rem; color: var(--accent); background: rgba(79,142,247,0.1); border-radius: 3px; padding: 1px 5px; }
+
+    /* ── Key factors ─────────────────────────────────────────────────────────── */
+    .kf-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid var(--border);
+    }
+    .kf-row:last-child { border-bottom: none; }
+    .kf-rank { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 700; color: var(--accent); }
+    .kf-label { flex: 1; font-size: 0.84rem; font-weight: 600; }
+    .kf-evidence { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .kf-bar-wrap { width: 120px; flex-shrink: 0; }
+    .kf-bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .kf-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .kf-bar-fill.fa { background: var(--accent); }
+    .kf-bar-fill.fb { background: var(--accent2); }
+    .kf-bar-fill.fn { background: var(--muted); }
+    .kf-dir { font-size: 0.68rem; font-weight: 700; margin-top: 3px; }
+    .kf-dir.fa { color: var(--accent); }
+    .kf-dir.fb { color: var(--accent2); }
+    .kf-dir.fn { color: var(--muted); }
+
+    /* ── Form table ──────────────────────────────────────────────────────────── */
+    .form-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .form-table th { text-align: left; padding: 6px 8px; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 600; }
+    .form-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .form-table tr:last-child td { border-bottom: none; }
+    .res-W { color: var(--green); font-weight: 700; }
+    .res-D { color: var(--yellow); font-weight: 700; }
+    .res-L { color: var(--red); font-weight: 700; }
+
+    /* ── H2H summary ─────────────────────────────────────────────────────────── */
+    .h2h-score { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 14px; }
+    .h2h-block { text-align: center; flex: 1; }
+    .h2h-block .hb-val { font-size: 2rem; font-weight: 800; }
+    .h2h-block .hb-label { font-size: 0.7rem; color: var(--muted); }
+    .h2h-sep { font-size: 1.2rem; color: var(--border2); padding: 0 8px; }
+
+    /* ── Insights list ───────────────────────────────────────────────────────── */
+    .insight-item {
+      display: flex; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--border); font-size: 0.86rem;
+    }
+    .insight-item:last-child { border-bottom: none; }
+    .insight-num {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; color: var(--accent);
+    }
+    .insight-text { flex: 1; }
+    .insight-cite { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── Evidence drawer ─────────────────────────────────────────────────────── */
+    .evidence-toggle {
+      background: none; border: 1px dashed var(--border);
+      color: var(--muted); border-radius: var(--radius-sm);
+      padding: 7px 14px; cursor: pointer; font-size: 0.78rem;
+      width: 100%; transition: all 0.12s; text-align: left;
+    }
+    .evidence-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .evidence-drawer {
+      display: none; margin-top: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+    }
+    .evidence-drawer.open { display: block; animation: fadeIn 0.2s ease; }
+    .ev-section-title { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 7px; }
+    .ev-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+    }
+    .ev-row:last-child { border-bottom: none; }
+    .ev-date { color: var(--muted); flex-shrink: 0; margin-right: 8px; min-width: 82px; }
+    .ev-match { flex: 1; }
+    .ev-result { font-weight: 700; margin-left: 8px; flex-shrink: 0; }
+    .source-row { font-size: 0.7rem; color: var(--muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+
+    /* ── Data status card ────────────────────────────────────────────────────── */
+    .ds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .ds-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+    .ds-chip .dc-val { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .ds-chip .dc-key { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+    .ds-limit { display: flex; gap: 7px; padding: 5px 0; font-size: 0.78rem; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .ds-limit:last-child { border-bottom: none; }
+    .ds-limit::before { content: "⚠"; flex-shrink: 0; color: var(--yellow); }
+
+    /* ── DQ bar ──────────────────────────────────────────────────────────────── */
+    .dq-bar-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 7px 0 5px; }
+    .dq-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--green)); transition: width 0.7s ease; }
+    .dq-label { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 1px 8px; border-radius: 10px; }
+    .dq-label.Excellent { background:var(--green-dim);  color:var(--green); }
+    .dq-label.Good      { background:rgba(79,142,247,0.1); color:var(--accent); }
+    .dq-label.Fair      { background:var(--yellow-dim); color:var(--yellow); }
+    .dq-label.Sparse    { background:var(--red-dim);    color:var(--red); }
+    .dq-label.None      { background:var(--surface2);   color:var(--muted); }
+
+    /* ── Caveats ─────────────────────────────────────────────────────────────── */
+    .caveat-item { display: flex; gap: 8px; padding: 5px 0; font-size: 0.78rem; color: var(--text2); border-bottom: 1px solid var(--border); }
+    .caveat-item:last-child { border-bottom: none; }
+    .caveat-item::before { content: "⚠"; flex-shrink: 0; color: var(--yellow); }
+
+    /* ── No-data state ───────────────────────────────────────────────────────── */
+    .no-data-state {
+      text-align: center; padding: 40px 24px;
+      background: var(--surface2); border: 1px dashed var(--border2);
+      border-radius: var(--radius); margin-bottom: 16px;
+    }
+    .no-data-state .nd-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .no-data-state .nd-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .no-data-state .nd-body  { font-size: 0.84rem; color: var(--muted); max-width: 400px; margin: 0 auto; }
+
+    /* ── Backtest page ───────────────────────────────────────────────────────── */
+    .bt-stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .bt-stat { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+    .bt-stat .bsv { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+    .bt-stat .bsk { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+    .calib-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .calib-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 0.78rem; }
+    .calib-card .cc-out { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .calib-card .cc-row { display: flex; justify-content: space-between; margin-top: 4px; }
+    .cc-err { font-weight: 700; }
+    .cc-err.good { color: var(--green); }
+    .cc-err.warn { color: var(--yellow); }
+    .cc-err.bad  { color: var(--red); }
+    .bt-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .bt-table th { text-align: left; padding: 7px 10px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 600; }
+    .bt-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+    .bt-table tr:last-child td { border-bottom: none; }
+    .bt-ok  { color: var(--green);  font-weight: 700; }
+    .bt-bad { color: var(--red);    font-weight: 700; }
+
+    /* ── Demo fixtures panel ─────────────────────────────────────────────────── */
+    .demo-panel { margin-bottom: 16px; }
+    .demo-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+    /* ── Model footer strip ─────────────────────────────────────────────────── */
+    .model-strip {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 8px; padding: 10px 0;
+      border-top: 1px solid var(--border); margin-top: 12px;
+    }
+    .ms-chip { font-size: 0.68rem; padding: 2px 8px; border-radius: var(--radius-sm); background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+    .ms-chip .msv { color: var(--accent); font-weight: 600; }
+
+    /* ── Spinner (full-page loading) ─────────────────────────────────────────── */
+    .page-spinner { display: none; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 30px auto; }
+    .page-spinner.show { display: block; }
+
+    /* ── Misc ────────────────────────────────────────────────────────────────── */
+    .section-gap { margin-bottom: 24px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 0.78rem; }
+    .mt-4 { margin-top: 4px; }
+    .warn-tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 10px; background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); font-size: 0.7rem; }
+
+    /* ── Responsive ─────────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .grid-2  { grid-template-columns: 1fr; }
+      .grid-3  { grid-template-columns: 1fr 1fr; }
+      .calib-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .kf-bar-wrap { display: none; }
+    }
+    @media (max-width: 480px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .topbar { padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══════════════════════════════ SIDEBAR ══════════════════════════════ -->
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="sidebar-brand">
+      <div class="brand-name">⚽ Match Predictor</div>
+      <div class="brand-sub">Historical Evidence Model</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Predict</div>
+      <button class="nav-btn active" data-page="predict" aria-current="page">
+        <span class="nav-icon">🔮</span> New Prediction
+      </button>
+
+      <div class="nav-section-label">Analysis</div>
+      <button class="nav-btn" data-page="backtest">
+        <span class="nav-icon">📊</span> Model Backtest
+      </button>
+      <button class="nav-btn" data-page="datastatus">
+        <span class="nav-icon">🗄️</span> Data Status
+      </button>
+
+      <div class="nav-section-label">Project</div>
+      <button class="nav-btn" data-page="about">
+        <span class="nav-icon">ℹ️</span> About
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      Historical data only · No live scores · Football (EPL, Euro, UCL)
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════ MAIN ════════════════════════════════ -->
+  <div class="main">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">New Prediction</div>
+      <div class="topbar-badges">
+        <span class="tb-badge">Poisson + Elo blend v2.0.0</span>
+        <span class="tb-badge live-no">⚠ Historical data only</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════════════ PAGE: PREDICT ══════════════════════════════════ -->
+      <div class="page active" id="page-predict">
+
+        <!-- Demo fixtures -->
+        <div class="demo-panel card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Quick demo — seeded fixtures</div>
+              <div class="card-sub">Pre-loaded from historical seed data. Click to auto-fill.</div>
+            </div>
+          </div>
+          <div class="demo-grid" id="demoGrid">
+            <span class="text-muted text-sm">Loading…</span>
+          </div>
+        </div>
+
+        <!-- Fixture selector -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <div class="card-title">Fixture Setup</div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="selCompetition">Competition</label>
+              <select id="selCompetition">
+                <option value="">Any competition</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="selDate">Match Date (optional, for leakage guard)</label>
+              <input type="date" id="selDate" />
+            </div>
+          </div>
+
+          <div class="grid-2" style="align-items:end">
+            <!-- Home team -->
+            <div class="field">
+              <label for="inpHome">Home Team</label>
+              <div class="autocomplete-wrap">
+                <input type="text" id="inpHome" placeholder="Type team name…" autocomplete="off" />
+                <div class="dropdown-list" id="dropHome"></div>
+              </div>
+            </div>
+            <!-- Away team -->
+            <div class="field">
+              <label for="inpAway">Away Team</label>
+              <div class="autocomplete-wrap">
+                <input type="text" id="inpAway" placeholder="Type team name…" autocomplete="off" />
+                <div class="dropdown-list" id="dropAway"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="selVenue">Venue</label>
+            <select id="selVenue">
+              <option value="">Neutral ground</option>
+              <option value="team_a">Home team is the designated host</option>
+              <option value="team_b">Away team is the designated host</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" id="btnPredict">🔮 Run Prediction Pipeline</button>
+        </div>
+
+        <!-- Pipeline progress (hidden until predict) -->
+        <div class="card pipeline-card" id="pipelineCard">
+          <div class="card-header">
+            <div class="card-title">4-Agent Pipeline</div>
+          </div>
+          <div id="agentRows"></div>
+        </div>
+
+        <!-- Result area (hidden until result) -->
+        <div id="resultArea" style="display:none">
+
+          <!-- ── Insufficient data state ─────────────────────────────── -->
+          <div id="stateNoData" class="no-data-state" style="display:none">
+            <div class="nd-icon">📭</div>
+            <div class="nd-title">No Prediction Available</div>
+            <div class="nd-body" id="stateNoDataBody">
+              Neither team has historical records in the dataset.
+              Equal probabilities (33/34/33) are shown as a placeholder only.
+              Add data for these teams and re-seed to enable a real prediction.
+            </div>
+          </div>
+
+          <!-- ── Main prediction card ───────────────────────────────── -->
+          <div class="card" id="cardPrediction">
+
+            <!-- Winner banner -->
+            <div class="winner-banner">
+              <div class="fixture-name" id="rFixtureName"></div>
+              <div>
+                <span class="winner-chip" id="rWinnerChip"></span>
+              </div>
+              <div class="conf-row">
+                <span class="conf-pill" id="rConfPill"></span>
+                <span class="conf-score" id="rConfScore"></span>
+              </div>
+            </div>
+
+            <!-- Probability bars -->
+            <div>
+              <div class="prob-header">
+                <span id="rProbLabelHome"></span>
+                <span>Draw</span>
+                <span id="rProbLabelAway"></span>
+              </div>
+              <div class="prob-track" role="img" id="rProbTrack" aria-label="Match outcome probabilities">
+                <div class="prob-seg home" id="rBarHome" style="width:0%"></div>
+                <div class="prob-seg draw" id="rBarDraw" style="width:0%"></div>
+                <div class="prob-seg away" id="rBarAway" style="width:0%"></div>
+              </div>
+              <div class="prob-legend">
+                <span><span class="dot" style="background:var(--accent)"></span><span id="rLegHome"></span></span>
+                <span><span class="dot" style="background:var(--surface3);border:1px solid var(--border2)"></span>Draw</span>
+                <span><span class="dot" style="background:var(--accent2)"></span><span id="rLegAway"></span></span>
+              </div>
+            </div>
+
+            <!-- xG row -->
+            <div class="xg-row" id="rXgRow" style="display:none"></div>
+
+            <!-- Model strip -->
+            <div class="model-strip" id="rModelStrip"></div>
+          </div>
+
+          <!-- ── Data quality card ───────────────────────────────────── -->
+          <div class="card" id="cardDQ">
+            <div class="card-header">
+              <div class="card-title">Data Quality</div>
+              <span class="dq-label" id="rDqLabel"></span>
+            </div>
+            <div class="dq-bar-track">
+              <div class="dq-bar-fill" id="rDqBar" style="width:0%"></div>
+            </div>
+            <div class="grid-3 mt-4" id="rDqStats"></div>
+            <div id="rDqWarnings" style="margin-top:10px"></div>
+          </div>
+
+          <!-- ── Caveats ────────────────────────────────────────────── -->
+          <div class="card" id="cardCaveats" style="display:none">
+            <div class="card-title" style="margin-bottom:10px">Model Caveats</div>
+            <div id="rCaveatsList"></div>
+          </div>
+
+          <!-- ── Key factors ────────────────────────────────────────── -->
+          <div class="card" id="cardFactors" style="display:none">
+            <div class="card-header">
+              <div class="card-title">Key Prediction Factors</div>
+              <span class="text-sm text-muted">ranked by contribution</span>
+            </div>
+            <div id="rFactorsList"></div>
+          </div>
+
+          <!-- ── Recent form comparison ─────────────────────────────── -->
+          <div class="card" id="cardForm" style="display:none">
+            <div class="card-header">
+              <div class="card-title">Recent Form</div>
+              <span class="text-sm text-muted" id="rFormSub"></span>
+            </div>
+            <div class="grid-2" id="rFormGrid"></div>
+          </div>
+
+          <!-- ── Head-to-head ───────────────────────────────────────── -->
+          <div class="card" id="cardH2H" style="display:none">
+            <div class="card-header">
+              <div class="card-title">Head-to-Head</div>
+              <span class="text-sm text-muted" id="rH2HSub"></span>
+            </div>
+            <div class="h2h-score" id="rH2HScore"></div>
+            <div id="rH2HTable"></div>
+          </div>
+
+          <!-- ── Explainable insights ───────────────────────────────── -->
+          <div class="card" id="cardInsights">
+            <div class="card-header">
+              <div class="card-title">Explainable AI Insights</div>
+              <span class="text-sm text-muted" id="rInsightsSub"></span>
+            </div>
+            <div id="rInsightsList"></div>
+
+            <!-- Evidence drawer -->
+            <div style="margin-top:12px">
+              <button class="evidence-toggle" id="rEvidenceToggle" style="display:none">
+                📋 Show retrieved evidence records
+              </button>
+              <div class="evidence-drawer" id="rEvidenceDrawer">
+                <div id="rEvidenceContent"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Reset ─────────────────────────────────────────────── -->
+          <button class="btn-ghost" id="btnReset" style="width:100%;margin-bottom:20px">↩ New Prediction</button>
+
+        </div><!-- /resultArea -->
+      </div><!-- /page-predict -->
+
+      <!-- ══════════════════ PAGE: BACKTEST ══════════════════════════════════ -->
+      <div class="page" id="page-backtest">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Model Backtest — Leave-One-Out Evaluation</div>
+              <div class="card-sub">
+                For each match, only records strictly before that date are used — no data leakage.
+                Baseline: random predictor ≈ 33% accuracy, Brier score ≈ 0.667.
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <button class="btn-ghost" id="btRunBtn">▶ Run backtest</button>
+            <select id="btLimit" style="width:auto;padding:8px 12px">
+              <option value="20">Last 20 matches</option>
+              <option value="50" selected>Last 50 matches</option>
+              <option value="90">All 90 matches</option>
+            </select>
+          </div>
+
+          <div class="page-spinner" id="btSpinner"></div>
+
+          <div id="btResults" style="display:none">
+            <div class="bt-stat-grid" id="btStatGrid"></div>
+            <div class="calib-grid" id="btCalibGrid"></div>
+            <div class="card-title" style="margin-bottom:10px">Sample predictions (up to 20)</div>
+            <div style="overflow-x:auto">
+              <table class="bt-table" aria-label="Backtest sample predictions">
+                <thead>
+                  <tr>
+                    <th>Fixture</th><th>Date</th><th>Actual</th><th>Score</th>
+                    <th>Predicted</th><th>H%</th><th>D%</th><th>A%</th><th>Conf.</th>
+                  </tr>
+                </thead>
+                <tbody id="btTableBody"></tbody>
+              </table>
+            </div>
+            <p class="text-sm text-muted" style="margin-top:8px">
+              Matches with no prior data (new teams) are automatically skipped.
+            </p>
+          </div>
+        </div>
+      </div><!-- /page-backtest -->
+
+      <!-- ══════════════════ PAGE: DATA STATUS ══════════════════════════════ -->
+      <div class="page" id="page-datastatus">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Data Status</div>
+          </div>
+          <div class="page-spinner" id="dsSpinner"></div>
+          <div id="dsContent" style="display:none">
+            <div class="ds-grid" id="dsStatGrid"></div>
+            <div class="card-title" style="margin-bottom:8px">Competitions covered</div>
+            <div id="dsCompList" style="margin-bottom:16px"></div>
+            <div class="card-title" style="margin-bottom:8px">Data sources</div>
+            <div id="dsSources" style="margin-bottom:16px"></div>
+            <div class="card-title" style="margin-bottom:8px">Known limitations</div>
+            <div id="dsLimits"></div>
+          </div>
+        </div>
+      </div><!-- /page-datastatus -->
+
+      <!-- ══════════════════ PAGE: ABOUT ════════════════════════════════════ -->
+      <div class="page" id="page-about">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">About this project</div>
+          <p class="text-sm" style="margin-bottom:12px;color:var(--text2)">
+            This application was built with <strong>IBM Bob</strong> as part of IBM Problem Statement 28 —
+            an AI Sports Match Predictor. IBM Bob was used as the AI engineering runtime to design,
+            write, and refine every component described below.
+          </p>
+
+          <div class="card-title" style="margin-bottom:8px">Runtime services</div>
+          <div style="margin-bottom:16px">
+            <div class="ev-row"><span class="ev-match">Statistical model</span><span class="pill pill-blue">Poisson + Elo blend — runs locally, deterministic, no network</span></div>
+            <div class="ev-row"><span class="ev-match">Data store</span><span class="pill pill-blue">SQLite (node:sqlite built-in) — 90 seeded historical records</span></div>
+            <div class="ev-row"><span class="ev-match">Insight narration</span><span class="pill pill-blue">Groq API · llama3-8b-8192 — LLM used for language only, not for numbers</span></div>
+            <div class="ev-row"><span class="ev-match">Web server</span><span class="pill pill-blue">Node.js + Express</span></div>
+            <div class="ev-row"><span class="ev-match">Engineering runtime</span><span class="pill pill-muted">Built with IBM Bob</span></div>
+          </div>
+
+          <div class="card-title" style="margin-bottom:8px">What this model does NOT do</div>
+          <div>
+            <div class="ds-limit">Provide live, real-time, or scraped match data of any kind</div>
+            <div class="ds-limit">Use the LLM to generate probability numbers (all maths is deterministic)</div>
+            <div class="ds-limit">Claim "RAG" without showing the retrieved records it used</div>
+            <div class="ds-limit">Predict matches for teams with no historical data without disclosing uncertainty</div>
+          </div>
+
+          <div class="card-title" style="margin-top:16px;margin-bottom:8px">Pipeline architecture</div>
+          <div class="text-sm" style="color:var(--text2)">
+            <strong>Agent 1 — Data Collection</strong>: Retrieves H2H and form records from SQLite with a date-leakage guard (no data on or after the fixture date is used).<br><br>
+            <strong>Agent 2 — Performance Analysis</strong>: Computes recency-weighted form scores, attack/defence strength, rest days, and H2H metrics. Pure computation — no LLM.<br><br>
+            <strong>Agent 3 — Prediction</strong>: Runs the Poisson + Elo blend model to produce calibrated win probabilities. Pure computation — no LLM.<br><br>
+            <strong>Agent 4 — Insight Generation</strong>: Sends the pre-computed numbers and evidence records to Groq (llama3-8b-8192) to generate fan-readable insights. The LLM is instructed to cite the evidence and is forbidden from inventing statistics.
+          </div>
+        </div>
+      </div><!-- /page-about -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   Football Match Predictor — Frontend JavaScript
+   All HTML is built via textContent / structured DOM, never innerHTML with
+   user-supplied data, to prevent XSS. Exception: server-controlled strings
+   from the API are considered trusted content.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+'use strict';
+
+// ── Safe HTML helper (for server-controlled strings only) ────────────────────
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let teamList   = [];
+let demoFixtures = [];
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+const PAGE_TITLES = {
+  predict:    'New Prediction',
+  backtest:   'Model Backtest',
+  datastatus: 'Data Status',
+  about:      'About',
+};
+
+document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => navigateTo(btn.dataset.page));
+});
+
+function navigateTo(page) {
+  document.querySelectorAll('.nav-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.page === page)
+  );
+  document.querySelectorAll('.page').forEach(p =>
+    p.classList.toggle('active', p.id === 'page-' + page)
+  );
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[page] ?? page;
+
+  // Lazy-load pages
+  if (page === 'datastatus') loadDataStatus();
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+(async function boot() {
+  try {
+    // Load team list and competition list in parallel
+    const [teamResp, compResp, demoResp] = await Promise.all([
+      fetch('/api/teams/football'),
+      fetch('/api/competitions'),
+      fetch('/api/demo-fixtures'),
+    ]);
+    const teamData = await teamResp.json();
+    const compData = await compResp.json();
+    const demoData = await demoResp.json();
+
+    teamList     = teamData.teams ?? [];
+    demoFixtures = demoData.fixtures ?? [];
+
+    // Populate competition selector
+    const sel = document.getElementById('selCompetition');
+    (compData.competitions ?? []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      sel.appendChild(opt);
+    });
+
+    // Build demo buttons
+    buildDemoGrid();
+  } catch (e) {
+    console.error('Boot error:', e);
+  }
+})();
+
+// ── Demo fixtures ─────────────────────────────────────────────────────────────
+function buildDemoGrid() {
+  const grid = document.getElementById('demoGrid');
+  grid.innerHTML = '';
+  demoFixtures.forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-demo';
+    btn.setAttribute('aria-label', `Load demo: ${f.home} vs ${f.away}`);
+    btn.textContent = `${f.home} vs ${f.away}`;
+    if (f.label) {
+      const sub = document.createElement('span');
+      sub.style.cssText = 'display:block;font-size:0.62rem;color:var(--muted);margin-top:1px';
+      sub.textContent = f.label;
+      btn.appendChild(sub);
+    }
+    btn.addEventListener('click', () => {
+      document.getElementById('inpHome').value   = f.home;
+      document.getElementById('inpAway').value   = f.away;
+      document.getElementById('selVenue').value  = f.venue_host ?? '';
+      if (f.competition) {
+        const sel = document.getElementById('selCompetition');
+        for (const opt of sel.options) {
+          if (opt.value === f.competition) { sel.value = f.competition; break; }
+        }
+      }
+      // Scroll to form
+      document.getElementById('btnPredict').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    grid.appendChild(btn);
+  });
+}
+
+// ── Autocomplete ──────────────────────────────────────────────────────────────
+setupAutocomplete('inpHome', 'dropHome');
+setupAutocomplete('inpAway', 'dropAway');
+
+function setupAutocomplete(inputId, dropId) {
+  const input = document.getElementById(inputId);
+  const drop  = document.getElementById(dropId);
+  let idx = -1;
+
+  function renderDrop(q) {
+    const filtered = q.length === 0
+      ? teamList
+      : teamList.filter(t => t.toLowerCase().includes(q.toLowerCase()));
+    drop.innerHTML = '';
+    filtered.slice(0, 14).forEach(t => {
+      const d = document.createElement('div');
+      d.className = 'dropdown-item';
+      d.textContent = t;
+      d.addEventListener('click', () => {
+        input.value = t;
+        drop.classList.remove('open');
+      });
+      drop.appendChild(d);
+    });
+    drop.classList.toggle('open', filtered.length > 0);
+    idx = -1;
+  }
+
+  function highlight(i) {
+    const items = drop.querySelectorAll('.dropdown-item');
+    items.forEach(it => it.classList.remove('focused'));
+    if (items[i]) { items[i].classList.add('focused'); items[i].scrollIntoView({ block: 'nearest' }); }
+  }
+
+  input.addEventListener('input',  () => renderDrop(input.value));
+  input.addEventListener('focus',  () => renderDrop(input.value));
+  input.addEventListener('keydown', e => {
+    const items = drop.querySelectorAll('.dropdown-item');
+    if (e.key === 'ArrowDown') { idx = Math.min(idx + 1, items.length - 1); highlight(idx); e.preventDefault(); }
+    if (e.key === 'ArrowUp')   { idx = Math.max(idx - 1, 0); highlight(idx); e.preventDefault(); }
+    if (e.key === 'Enter' && idx >= 0) { input.value = items[idx].textContent; drop.classList.remove('open'); idx = -1; }
+    if (e.key === 'Escape') drop.classList.remove('open');
+  });
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !drop.contains(e.target)) drop.classList.remove('open');
+  });
+}
+
+// ── Pipeline constants ────────────────────────────────────────────────────────
+const AGENTS = [
+  { icon: '🗄️', name: 'Agent 1 — Historical Record Lookup',      label: 'Retrieving & validating historical records…' },
+  { icon: '📊', name: 'Agent 2 — Performance Analysis',           label: 'Computing recency-weighted form and attack metrics…' },
+  { icon: '🎯', name: 'Agent 3 — Poisson + Elo Prediction Model', label: 'Running deterministic probability model…' },
+  { icon: '💡', name: 'Agent 4 — Insight Generation (LLM)',       label: 'Generating evidence-grounded insights via Groq…' },
+];
+
+// ── Predict ───────────────────────────────────────────────────────────────────
+document.getElementById('btnPredict').addEventListener('click', runPrediction);
+
+async function runPrediction() {
+  const home = document.getElementById('inpHome').value.trim();
+  const away = document.getElementById('inpAway').value.trim();
+  if (!home || !away) { alert('Please enter both Home and Away teams.'); return; }
+  if (home.toLowerCase() === away.toLowerCase()) { alert('Home and Away teams must be different.'); return; }
+
+  const payload = {
+    team_a:       home,
+    team_b:       away,
+    sport:        'football',
+    venue_host:   document.getElementById('selVenue').value || null,
+    fixture_date: document.getElementById('selDate').value || null,
+  };
+
+  // Hide form, show pipeline
+  document.getElementById('resultArea').style.display = 'none';
+  const pipeCard = document.getElementById('pipelineCard');
+  pipeCard.classList.add('visible');
+  document.getElementById('agentRows').innerHTML = AGENTS.map((a, i) => `
+    <div class="pipeline-row" id="aRow${i+1}">
+      <div class="agent-icon" id="aIcon${i+1}">${esc(a.icon)}</div>
+      <div class="agent-info">
+        <div class="agent-name">${esc(a.name)}</div>
+        <div class="agent-status" id="aStat${i+1}">Waiting…</div>
+      </div>
+      <div class="spinner" id="aSpin${i+1}"></div>
+      <div class="agent-tick" id="aTick${i+1}">✓</div>
+    </div>
+  `).join('');
+  pipeCard.scrollIntoView({ behavior: 'smooth' });
+
+  try {
+    const resp = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const reader  = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const parts = buf.split('\n\n');
+      buf = parts.pop();
+      for (const part of parts) {
+        const line = part.replace(/^data: /, '').trim();
+        if (!line) continue;
+        const msg = JSON.parse(line);
+        if (msg.type === 'agent')  handleAgentEvent(msg);
+        if (msg.type === 'result') showResult(msg.payload, home, away);
+        if (msg.type === 'error')  { alert('Pipeline error: ' + msg.message); resetPredict(); }
+      }
+    }
+  } catch (e) {
+    alert('Connection error: ' + e.message);
+    resetPredict();
+  }
+}
+
+function handleAgentEvent({ agent, status, label }) {
+  const icon   = document.getElementById(`aIcon${agent}`);
+  const statEl = document.getElementById(`aStat${agent}`);
+  const spin   = document.getElementById(`aSpin${agent}`);
+  const tick   = document.getElementById(`aTick${agent}`);
+  if (!icon) return;
+  if (status === 'running') {
+    icon.classList.add('running');
+    statEl.textContent = label ?? AGENTS[agent - 1]?.label ?? '';
+    spin.classList.add('show');
+  } else {
+    icon.classList.remove('running'); icon.classList.add('done');
+    statEl.textContent = 'Complete';
+    spin.classList.remove('show');
+    tick.classList.add('show');
+  }
+}
+
+// ── Result rendering ──────────────────────────────────────────────────────────
+function showResult(data, homeTeam, awayTeam) {
+  document.getElementById('pipelineCard').classList.remove('visible');
+  const mp  = data.match_prediction;
+  const ev  = mp.retrieved_evidence;
+  const dq  = ev?.data_quality;
+  const pt  = mp.performance_trends;
+  const h2h = pt?.h2h_metrics;
+
+  // Scroll to result
+  const area = document.getElementById('resultArea');
+  area.style.display = '';
+  area.scrollIntoView({ behavior: 'smooth' });
+
+  // ── Insufficient data banner ────────────────────────────────────────────────
+  const noDataDiv = document.getElementById('stateNoData');
+  const isNoData  = mp.predicted_winner === 'Unavailable' || !mp.winner_is_certain && mp.confidence === 'Insufficient';
+  noDataDiv.style.display = isNoData ? '' : 'none';
+  if (isNoData) {
+    document.getElementById('stateNoDataBody').textContent =
+      (mp.caveats && mp.caveats.length > 0) ? mp.caveats[0] :
+      `No historical records found for "${homeTeam}" or "${awayTeam}". Prediction unavailable.`;
+  }
+
+  // ── Winner banner ───────────────────────────────────────────────────────────
+  document.getElementById('rFixtureName').textContent = mp.fixture;
+
+  const winChip = document.getElementById('rWinnerChip');
+  if (!mp.winner_is_certain || mp.predicted_winner === 'Unavailable') {
+    winChip.textContent = '⚖ Uncertain · Could go either way';
+    winChip.className   = 'winner-chip uncertain';
+  } else if (mp.predicted_winner === 'Draw') {
+    winChip.textContent = '🤝 Predicted: Draw';
+    winChip.className   = 'winner-chip';
+  } else {
+    winChip.textContent = '🏆 Predicted: ' + mp.predicted_winner;
+    winChip.className   = 'winner-chip';
+  }
+
+  const confPill  = document.getElementById('rConfPill');
+  confPill.textContent = mp.confidence + ' Confidence';
+  confPill.className   = 'conf-pill ' + mp.confidence;
+
+  const confScore = document.getElementById('rConfScore');
+  if (mp.confidence_score != null) {
+    confScore.textContent = 'Score: ' + Math.round(mp.confidence_score * 100) + '%';
+    confScore.style.display = '';
+  } else {
+    confScore.style.display = 'none';
+  }
+
+  // ── Probability bars ────────────────────────────────────────────────────────
+  const { team_a_pct: hp, team_b_pct: ap, draw_pct: dp } = mp.win_probability;
+  document.getElementById('rProbLabelHome').textContent = homeTeam;
+  document.getElementById('rProbLabelAway').textContent = awayTeam;
+  document.getElementById('rLegHome').textContent = homeTeam + ' ' + hp + '%';
+  document.getElementById('rLegAway').textContent = awayTeam + ' ' + ap + '%';
+
+  // Set aria-label with text alternative (accessibility)
+  document.getElementById('rProbTrack').setAttribute('aria-label',
+    `${homeTeam} win ${hp}%, Draw ${dp}%, ${awayTeam} win ${ap}%`);
+
+  const bH = document.getElementById('rBarHome');
+  const bD = document.getElementById('rBarDraw');
+  const bA = document.getElementById('rBarAway');
+  bH.style.width = '0%'; bD.style.width = '0%'; bA.style.width = '0%';
+  bH.textContent = ''; bD.textContent = ''; bA.textContent = '';
+  setTimeout(() => {
+    bH.style.width = hp + '%'; bH.textContent = hp > 8 ? hp + '%' : '';
+    bD.style.width = dp + '%'; bD.textContent = dp > 8 ? dp + '%' : '';
+    bA.style.width = ap + '%'; bA.textContent = ap > 8 ? ap + '%' : '';
+  }, 80);
+
+  // ── xG row ──────────────────────────────────────────────────────────────────
+  const xg    = mp.expected_goals;
+  const xgRow = document.getElementById('rXgRow');
+  if (xg && xg.method !== 'none' && xg.team_a_xg != null) {
+    const methodLabel = xg.method === 'poisson' ? 'Poisson λ' : 'Elo';
+    xgRow.innerHTML = `
+      <div class="xg-chip"><span class="xl">${esc(homeTeam)} xG</span><span class="xv">${xg.team_a_xg.toFixed(2)}</span><span class="xm">${esc(methodLabel)}</span></div>
+      <div class="xg-chip"><span class="xl">${esc(awayTeam)} xG</span><span class="xv">${xg.team_b_xg.toFixed(2)}</span><span class="xm">${esc(methodLabel)}</span></div>`;
+    xgRow.style.display = '';
+  } else {
+    xgRow.style.display = 'none';
+  }
+
+  // ── Model strip ─────────────────────────────────────────────────────────────
+  const strip = document.getElementById('rModelStrip');
+  strip.innerHTML = `
+    <span class="ms-chip">Model <span class="msv">${esc(mp.model_type ?? 'poisson_elo_blend')}</span></span>
+    <span class="ms-chip">Version <span class="msv">${esc(mp.model_version ?? '—')}</span></span>
+    <span class="ms-chip" style="${mp.llm_used ? 'color:var(--accent2)' : 'color:var(--muted)'}">
+      ${mp.llm_used ? '✦ Groq narration' : '⚠ Template insights (LLM unavailable)'}
+    </span>`;
+
+  // ── Data quality card ────────────────────────────────────────────────────────
+  if (dq) {
+    const labelEl = document.getElementById('rDqLabel');
+    labelEl.textContent = dq.label;
+    labelEl.className   = 'dq-label ' + dq.label;
+    document.getElementById('rDqBar').style.width = Math.round((dq.score ?? 0) * 100) + '%';
+
+    const freshText = dq.freshness_days != null
+      ? (dq.freshness_days === 0 ? 'today' : dq.freshness_days + 'd ago')
+      : '—';
+    document.getElementById('rDqStats').innerHTML = `
+      <div class="stat-chip"><div class="sc-val">${dq.h2h_count ?? 0}</div><div class="sc-key">H2H records</div></div>
+      <div class="stat-chip"><div class="sc-val">${dq.team_a_form_count ?? 0}</div><div class="sc-key">${esc(homeTeam)} form</div></div>
+      <div class="stat-chip"><div class="sc-val">${dq.team_b_form_count ?? 0}</div><div class="sc-key">${esc(awayTeam)} form</div></div>
+      <div class="stat-chip"><div class="sc-val">${esc(freshText)}</div><div class="sc-key">Data freshness</div></div>`;
+
+    const warnEl = document.getElementById('rDqWarnings');
+    warnEl.innerHTML = (dq.warnings ?? []).map(w =>
+      `<div class="warn-tag">⚠ ${esc(w)}</div>`
+    ).join(' ');
+    document.getElementById('cardDQ').style.display = '';
+  } else {
+    document.getElementById('cardDQ').style.display = 'none';
+  }
+
+  // ── Caveats ──────────────────────────────────────────────────────────────────
+  const caveats = mp.caveats ?? [];
+  const cardCav = document.getElementById('cardCaveats');
+  if (caveats.length > 0) {
+    document.getElementById('rCaveatsList').innerHTML = caveats.map(c =>
+      `<div class="caveat-item">${esc(c)}</div>`
+    ).join('');
+    cardCav.style.display = '';
+  } else {
+    cardCav.style.display = 'none';
+  }
+
+  // ── Key factors ──────────────────────────────────────────────────────────────
+  const factors = mp.key_factors ?? [];
+  const cardFact = document.getElementById('cardFactors');
+  if (factors.length > 0) {
+    document.getElementById('rFactorsList').innerHTML = factors.map((f, i) => {
+      const barClass = f.direction === 'favours_a' ? 'fa' : f.direction === 'favours_b' ? 'fb' : 'fn';
+      const dirLabel = f.direction === 'favours_a' ? `→ favours ${esc(homeTeam)}`
+                     : f.direction === 'favours_b' ? `→ favours ${esc(awayTeam)}`
+                     : '→ neutral';
+      const pct = Math.round((f.magnitude ?? 0) * 100);
+      return `<div class="kf-row">
+        <div class="kf-rank">${i + 1}</div>
+        <div style="flex:1">
+          <div class="kf-label">${esc(f.factor)}</div>
+          <div class="kf-evidence">${esc(f.evidence)}</div>
+        </div>
+        <div class="kf-bar-wrap">
+          <div class="kf-bar-track"><div class="kf-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+          <div class="kf-dir ${barClass}">${dirLabel}</div>
+        </div>
+      </div>`;
+    }).join('');
+    cardFact.style.display = '';
+  } else {
+    cardFact.style.display = 'none';
+  }
+
+  // ── Recent form comparison ────────────────────────────────────────────────────
+  const teamAForm = ev?.team_a_form ?? [];
+  const teamBForm = ev?.team_b_form ?? [];
+  const cardForm  = document.getElementById('cardForm');
+  if (teamAForm.length > 0 || teamBForm.length > 0) {
+    document.getElementById('rFormSub').textContent =
+      `Last ${Math.max(teamAForm.length, teamBForm.length)} matches used`;
+    const grid = document.getElementById('rFormGrid');
+    grid.innerHTML = `
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;margin-bottom:8px">${esc(homeTeam)}</div>
+        ${buildFormDots(teamAForm, pt?.team_a_form_string)}
+        ${buildFormTable(teamAForm)}
+      </div>
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;margin-bottom:8px">${esc(awayTeam)}</div>
+        ${buildFormDots(teamBForm, pt?.team_b_form_string)}
+        ${buildFormTable(teamBForm)}
+      </div>`;
+    cardForm.style.display = '';
+  } else {
+    cardForm.style.display = 'none';
+  }
+
+  // ── Head-to-head ─────────────────────────────────────────────────────────────
+  const h2hRows  = ev?.head_to_head ?? [];
+  const cardH2H  = document.getElementById('cardH2H');
+  if (h2hRows.length > 0 && h2h) {
+    const dates = h2hRows.map(r => r.match_date).sort();
+    document.getElementById('rH2HSub').textContent =
+      dates.length > 0 ? `${dates[0]} – ${dates[dates.length - 1]}` : '';
+
+    document.getElementById('rH2HScore').innerHTML = `
+      <div class="h2h-block">
+        <div class="hb-val" style="color:var(--accent)">${h2h.team_a_wins ?? 0}</div>
+        <div class="hb-label">${esc(homeTeam)} wins</div>
+      </div>
+      <div class="h2h-sep">/</div>
+      <div class="h2h-block">
+        <div class="hb-val" style="color:var(--muted)">${h2h.draws ?? 0}</div>
+        <div class="hb-label">Draws</div>
+      </div>
+      <div class="h2h-sep">/</div>
+      <div class="h2h-block">
+        <div class="hb-val" style="color:var(--accent2)">${h2h.team_b_wins ?? 0}</div>
+        <div class="hb-label">${esc(awayTeam)} wins</div>
+      </div>`;
+
+    document.getElementById('rH2HTable').innerHTML = buildMatchTable(h2hRows, null);
+    cardH2H.style.display = '';
+  } else {
+    cardH2H.style.display = 'none';
+  }
+
+  // ── Explainable insights ──────────────────────────────────────────────────────
+  const insights = mp.explainable_insights ?? [];
+  document.getElementById('rInsightsSub').textContent = mp.llm_used
+    ? 'Generated by Groq · llama3-8b-8192 · evidence-grounded'
+    : 'Fallback template — LLM unavailable';
+  document.getElementById('rInsightsList').innerHTML = insights.map((ins, i) => `
+    <div class="insight-item">
+      <div class="insight-num">${i + 1}</div>
+      <div class="insight-text">${esc(ins)}</div>
+    </div>`).join('');
+
+  // Evidence drawer
+  const hasEvidence = h2hRows.length > 0 || teamAForm.length > 0 || teamBForm.length > 0;
+  const evToggle    = document.getElementById('rEvidenceToggle');
+  evToggle.style.display = hasEvidence ? '' : 'none';
+  // Remove stale listeners
+  const newToggle = evToggle.cloneNode(true);
+  evToggle.parentNode.replaceChild(newToggle, evToggle);
+  newToggle.style.display = hasEvidence ? '' : 'none';
+  newToggle.addEventListener('click', () => {
+    const drawer = document.getElementById('rEvidenceDrawer');
+    const open   = drawer.classList.toggle('open');
+    newToggle.textContent = open ? '📋 Hide retrieved evidence records' : '📋 Show retrieved evidence records';
+    if (open && !drawer._rendered) {
+      drawer._rendered = true;
+      renderEvidenceDrawer(ev, homeTeam, awayTeam);
+    }
+  });
+
+  // Reset drawer state on new prediction
+  const drawer = document.getElementById('rEvidenceDrawer');
+  drawer.classList.remove('open');
+  drawer._rendered = false;
+  newToggle.textContent = '📋 Show retrieved evidence records';
+}
+
+// ── Form dots ─────────────────────────────────────────────────────────────────
+function buildFormDots(rows, formString) {
+  const chars = formString ?? rows.map(r => r.team_result ?? '?');
+  const dots  = [...String(chars)].map(c => `<div class="fd fd-${c === 'W' || c === 'D' || c === 'L' ? c : '?'}">${esc(c)}</div>`);
+  return `<div class="form-dots" style="margin-bottom:8px">${dots.join('')}</div>`;
+}
+
+// ── Match table (form or H2H) ─────────────────────────────────────────────────
+function buildFormTable(rows) {
+  if (!rows || rows.length === 0) return '<p class="text-sm text-muted">No records available</p>';
+  const rowsHtml = rows.map(r => {
+    const res = r.team_result ?? (r.result === 'H' ? 'H' : r.result === 'A' ? 'A' : 'D');
+    const resClass = res === 'W' ? 'res-W' : res === 'L' ? 'res-L' : 'res-D';
+    return `<tr>
+      <td class="text-muted">${esc(r.match_date)}</td>
+      <td>${esc(r.home_team)} ${r.home_goals}–${r.away_goals} ${esc(r.away_team)}</td>
+      <td class="${resClass}">${esc(res)}</td>
+      <td class="text-muted" style="font-size:0.7rem">${esc(r.competition ?? '')}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="form-table"><thead><tr><th>Date</th><th>Match</th><th>Res</th><th>Comp.</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+}
+
+function buildMatchTable(rows, teamName) {
+  if (!rows || rows.length === 0) return '<p class="text-sm text-muted">No H2H records available</p>';
+  const rowsHtml = rows.map(r => `<tr>
+    <td class="text-muted">${esc(r.match_date)}</td>
+    <td>${esc(r.home_team)} ${r.home_goals}–${r.away_goals} ${esc(r.away_team)}</td>
+    <td class="text-muted" style="font-size:0.7rem">${esc(r.competition ?? '')}</td>
+  </tr>`).join('');
+  return `<table class="form-table"><thead><tr><th>Date</th><th>Match</th><th>Comp.</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+}
+
+// ── Evidence drawer rendering ─────────────────────────────────────────────────
+function renderEvidenceDrawer(ev, homeTeam, awayTeam) {
+  const container = document.getElementById('rEvidenceContent');
+  const sections  = [];
+
+  if (ev?.head_to_head?.length > 0) {
+    sections.push(`<div class="ev-section-title">Head-to-Head (last ${ev.head_to_head.length})</div>`);
+    sections.push(ev.head_to_head.map(r => `<div class="ev-row">
+      <span class="ev-date">${esc(r.match_date)}</span>
+      <span class="ev-match">${esc(r.home_team)} ${r.home_goals}–${r.away_goals} ${esc(r.away_team)}</span>
+      <span class="ev-result" style="color:var(--muted);font-size:0.7rem">${esc(r.competition ?? '')}</span>
+    </div>`).join(''));
+  }
+
+  if (ev?.team_a_form?.length > 0) {
+    sections.push(`<div class="ev-section-title" style="margin-top:12px">${esc(homeTeam)} — Recent Form</div>`);
+    sections.push(ev.team_a_form.map(r => `<div class="ev-row">
+      <span class="ev-date">${esc(r.match_date)}</span>
+      <span class="ev-match">${esc(r.home_team)} ${r.home_goals}–${r.away_goals} ${esc(r.away_team)}</span>
+      <span class="ev-result res-${r.team_result}">${esc(r.team_result ?? '')}</span>
+    </div>`).join(''));
+  }
+
+  if (ev?.team_b_form?.length > 0) {
+    sections.push(`<div class="ev-section-title" style="margin-top:12px">${esc(awayTeam)} — Recent Form</div>`);
+    sections.push(ev.team_b_form.map(r => `<div class="ev-row">
+      <span class="ev-date">${esc(r.match_date)}</span>
+      <span class="ev-match">${esc(r.home_team)} ${r.home_goals}–${r.away_goals} ${esc(r.away_team)}</span>
+      <span class="ev-result res-${r.team_result}">${esc(r.team_result ?? '')}</span>
+    </div>`).join(''));
+  }
+
+  // Feature values
+  const fv = ev?.feature_values;
+  if (fv && Object.keys(fv).length > 0) {
+    sections.push(`<div class="ev-section-title" style="margin-top:12px">Model Feature Values</div>`);
+    const fvRows = [
+      ['Form score (' + homeTeam + ')', fv.form_score_a?.toFixed(3)],
+      ['Form score (' + awayTeam + ')', fv.form_score_b?.toFixed(3)],
+      ['Attack (' + homeTeam + ')', fv.attack_a?.toFixed(3)],
+      ['Attack (' + awayTeam + ')', fv.attack_b?.toFixed(3)],
+      ['Defence (' + homeTeam + ')', fv.defence_a?.toFixed(3)],
+      ['Defence (' + awayTeam + ')', fv.defence_b?.toFixed(3)],
+      ['H2H win rate (' + homeTeam + ')', fv.h2h_win_rate_a?.toFixed(3)],
+      ['Home advantage factor', fv.home_advantage?.toFixed(3)],
+    ].filter(([, v]) => v != null);
+    sections.push(fvRows.map(([k, v]) =>
+      `<div class="ev-row"><span class="ev-match">${esc(k)}</span><span>${esc(v)}</span></div>`
+    ).join(''));
+  }
+
+  // Sources
+  const sources = ev?.source_citations ?? ev?.sources ?? [];
+  if (sources.length > 0) {
+    const links = sources.map(s => {
+      const name = s.source_name ?? s.name ?? '—';
+      const url  = s.url;
+      return url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>` : esc(name);
+    }).join(', ');
+    sections.push(`<div class="source-row">Sources: ${links}</div>`);
+  }
+
+  container.innerHTML = sections.join('');
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+document.getElementById('btnReset').addEventListener('click', resetPredict);
+
+function resetPredict() {
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('pipelineCard').classList.remove('visible');
+  document.getElementById('inpHome').value  = '';
+  document.getElementById('inpAway').value  = '';
+  document.getElementById('selVenue').value = '';
+  document.getElementById('selDate').value  = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Backtest ──────────────────────────────────────────────────────────────────
+document.getElementById('btRunBtn').addEventListener('click', runBacktest);
+
+async function runBacktest() {
+  const limit   = document.getElementById('btLimit').value;
+  const spinner = document.getElementById('btSpinner');
+  const results = document.getElementById('btResults');
+  const btn     = document.getElementById('btRunBtn');
+
+  btn.disabled = true;
+  spinner.classList.add('show');
+  results.style.display = 'none';
+
+  try {
+    const resp = await fetch(`/api/backtest?limit=${limit}`);
+    const data = await resp.json();
+
+    if (data.error) { alert('Backtest error: ' + data.error); return; }
+
+    // Summary stats
+    document.getElementById('btStatGrid').innerHTML = `
+      <div class="bt-stat"><div class="bsv">${Math.round(data.accuracy * 100)}%</div><div class="bsk">Accuracy</div></div>
+      <div class="bt-stat"><div class="bsv">${data.brier_score}</div><div class="bsk">Brier Score (↓ better)</div></div>
+      <div class="bt-stat"><div class="bsv">${data.matches_evaluated}</div><div class="bsk">Matches evaluated</div></div>`;
+
+    // Calibration
+    const outLabels = { H: 'Home Win', D: 'Draw', A: 'Away Win' };
+    document.getElementById('btCalibGrid').innerHTML = Object.entries(data.calibration ?? {}).map(([k, v]) => {
+      const ec = v.calibration_error < 0.05 ? 'good' : v.calibration_error < 0.15 ? 'warn' : 'bad';
+      return `<div class="calib-card">
+        <div class="cc-out">${esc(outLabels[k] ?? k)}</div>
+        <div class="cc-row"><span>Predicted</span><span>${(v.mean_predicted * 100).toFixed(1)}%</span></div>
+        <div class="cc-row"><span>Empirical</span><span>${(v.empirical_freq * 100).toFixed(1)}%</span></div>
+        <div class="cc-row"><span>Error</span><span class="cc-err ${ec}">${v.calibration_error.toFixed(3)}</span></div>
+      </div>`;
+    }).join('');
+
+    // Sample table
+    document.getElementById('btTableBody').innerHTML = (data.sample_predictions ?? []).map(p => `<tr>
+      <td>${esc(p.fixture)}</td>
+      <td class="text-muted">${esc(p.date)}</td>
+      <td>${esc(p.actual_result)}</td>
+      <td class="text-muted">${esc(p.actual_score)}</td>
+      <td class="${p.correct ? 'bt-ok' : 'bt-bad'}">${p.correct ? '✓' : '✗'} ${esc(p.predicted)}</td>
+      <td>${p.home_pct}%</td><td>${p.draw_pct}%</td><td>${p.away_pct}%</td>
+      <td>${esc(p.confidence)}</td>
+    </tr>`).join('');
+
+    results.style.display = '';
+  } catch (e) {
+    alert('Backtest failed: ' + e.message);
+  } finally {
+    spinner.classList.remove('show');
+    btn.disabled = false;
+  }
+}
+
+// ── Data status ───────────────────────────────────────────────────────────────
+let dsLoaded = false;
+async function loadDataStatus() {
+  if (dsLoaded) return;
+  const spinner = document.getElementById('dsSpinner');
+  const content = document.getElementById('dsContent');
+  spinner.classList.add('show');
+  try {
+    const resp = await fetch('/api/data-status');
+    const d    = await resp.json();
+    dsLoaded   = true;
+
+    document.getElementById('dsStatGrid').innerHTML = `
+      <div class="ds-chip"><div class="dc-val">${d.records}</div><div class="dc-key">Match records</div></div>
+      <div class="ds-chip"><div class="dc-val">${d.teams}</div><div class="dc-key">Teams</div></div>
+      <div class="ds-chip"><div class="dc-val">${d.date_range?.earliest ?? '—'}</div><div class="dc-key">Earliest record</div></div>
+      <div class="ds-chip"><div class="dc-val">${d.date_range?.latest ?? '—'}</div><div class="dc-key">Latest record</div></div>
+      <div class="ds-chip"><div class="dc-val">${d.freshness_days != null ? d.freshness_days + 'd' : '—'}</div><div class="dc-key">Data age (days)</div></div>`;
+
+    document.getElementById('dsCompList').innerHTML = (d.competitions ?? []).map(c =>
+      `<span class="pill pill-muted" style="margin:3px">${esc(c)}</span>`
+    ).join('');
+
+    document.getElementById('dsSources').innerHTML = (d.sources ?? []).map(s =>
+      `<div class="ev-row">
+        <span class="ev-match">${esc(s.name)}</span>
+        <span class="text-muted" style="font-size:0.7rem">${esc(s.retrieved_at ?? '')}</span>
+      </div>`
+    ).join('');
+
+    document.getElementById('dsLimits').innerHTML = (d.limitations ?? []).map(l =>
+      `<div class="ds-limit">${esc(l)}</div>`
+    ).join('');
+
+    content.style.display = '';
+  } catch (e) {
+    document.getElementById('dsContent').innerHTML =
+      `<p class="text-sm text-muted">Could not load data status: ${esc(e.message)}</p>`;
+    content.style.display = '';
+  } finally {
+    spinner.classList.remove('show');
+  }
+}
+
+// ── Keyboard navigation: escape closes dropdowns ───────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.dropdown-list.open').forEach(d => d.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+match_date,competition,season,home_team,away_team,home_goals,away_goals,home_shots,away_shots,home_shots_on_target,away_shots_on_target,home_corners,away_corners,home_fouls,away_fouls,home_yellow_cards,away_yellow_cards,home_red_cards,away_red_cards,venue,notes
+2023-08-12,EPL,2023/24,Arsenal,Nottingham Forest,2,1,14,8,7,3,7,4,12,14,2,3,0,0,Emirates Stadium,Arsenal opened their season with a comfortable home win. Saka and Martinelli combined well throughout.
+2023-08-19,EPL,2023/24,Manchester City,Newcastle United,1,0,18,9,8,4,9,3,10,11,1,2,0,0,Etihad Stadium,City edged a tight contest. Haaland hit the post twice before the solitary goal arrived late.
+2023-08-19,EPL,2023/24,Liverpool,Bournemouth,3,1,17,7,9,3,8,2,11,16,1,2,0,0,Anfield,Liverpool dominated after the break. Salah scored twice in the second half.
+2023-08-26,EPL,2023/24,Arsenal,Fulham,2,2,15,11,6,5,6,6,14,12,2,2,0,0,Emirates Stadium,Arsenal led twice but were pegged back. Declan Rice marked his home debut.
+2023-09-02,EPL,2023/24,Manchester City,Fulham,5,1,21,7,11,3,10,4,8,13,1,2,0,0,Etihad Stadium,Haaland hat-trick as City ran riot.
+2023-09-03,EPL,2023/24,Liverpool,Aston Villa,3,0,16,8,8,4,7,3,12,15,1,3,0,1,Anfield,Clinical Liverpool shut out Villa. Diaz scored a brace.
+2023-09-16,EPL,2023/24,Arsenal,Manchester United,3,1,14,9,7,4,8,5,11,10,1,2,0,0,Emirates Stadium,Arsenal controlled the game throughout. Odegaard pulled the strings in midfield.
+2023-09-23,EPL,2023/24,Manchester City,Nottingham Forest,2,0,19,5,10,2,8,3,9,14,0,3,0,0,Etihad Stadium,Controlled City performance. Phil Foden ran the show.
+2023-09-30,EPL,2023/24,Liverpool,Tottenham,4,2,18,11,9,5,9,6,10,12,2,2,0,0,Anfield,Thrilling match. Salah opened and closed the scoring for Liverpool.
+2023-10-08,EPL,2023/24,Chelsea,Arsenal,0,1,10,14,4,6,5,7,14,11,3,1,0,0,Stamford Bridge,Arsenal's solitary goal proved decisive. Raya was rarely troubled at his old club.
+2023-10-08,EPL,2023/24,Manchester United,Brentford,1,2,11,13,5,7,6,8,13,10,2,2,0,0,Old Trafford,Brentford's set-piece quality undid United. A damaging home defeat.
+2023-10-21,EPL,2023/24,Tottenham,Fulham,2,0,13,9,6,3,7,4,12,13,1,2,0,0,Tottenham Hotspur Stadium,Son Heung-min inspired Spurs. Clean sheet consolidated their top-four push.
+2023-10-28,EPL,2023/24,Arsenal,Sheffield United,5,0,20,5,12,2,9,2,8,17,0,4,0,0,Emirates Stadium,Dominant Arsenal performance. Leandro Trossard scored twice.
+2023-10-28,EPL,2023/24,Manchester City,Brighton,2,1,16,12,8,5,8,7,11,10,1,2,0,0,Etihad Stadium,De Bruyne returned and immediately influenced proceedings. Tight win.
+2023-11-04,EPL,2023/24,Liverpool,Luton Town,4,1,18,7,9,3,8,4,10,14,1,2,0,0,Anfield,Liverpool hit four for the second time this season. Jota came off the bench to score.
+2023-11-11,EPL,2023/24,Aston Villa,Chelsea,0,0,11,10,4,4,6,5,13,12,2,2,0,0,Villa Park,Goalless draw in a physical game. Both keepers made impressive saves.
+2023-11-25,EPL,2023/24,Arsenal,Brentford,1,0,15,8,7,3,7,5,12,11,2,1,0,0,Emirates Stadium,Arsenal's narrow win kept them level on points with City. Saka won it from the penalty spot.
+2023-11-25,EPL,2023/24,Manchester United,Everton,0,3,9,12,3,7,5,7,15,9,3,1,1,0,Old Trafford,Shocking United home defeat. Ten Hag facing mounting pressure.
+2023-12-02,EPL,2023/24,Liverpool,Fulham,4,3,17,14,9,7,8,8,11,13,2,2,0,0,Anfield,Goal-fest at Anfield. Liverpool's superior firepower eventually told.
+2023-12-02,EPL,2023/24,Manchester City,Tottenham,3,3,17,13,8,7,8,8,10,11,2,2,0,0,Etihad Stadium,Dramatic draw. City led 3-0 before a Spurs comeback stunned the Etihad.
+2023-12-09,EPL,2023/24,Chelsea,Brighton,3,2,13,12,7,6,7,7,12,11,2,2,0,0,Stamford Bridge,Chelsea comeback inspired by Gallagher and Palmer. Brighton pushed hard throughout.
+2023-12-16,EPL,2023/24,Arsenal,Aston Villa,0,1,13,10,5,5,7,6,12,11,2,2,0,0,Emirates Stadium,Villa's Watkins punished an Arsenal defensive lapse. Rare Emirates defeat for Arsenal.
+2024-01-01,EPL,2023/24,Arsenal,Liverpool,2,2,13,14,6,7,7,8,12,11,1,2,0,0,Emirates Stadium,New Year's Day top-of-the-table draw. Both sides denied a winner by excellent goalkeeping.
+2024-01-13,EPL,2023/24,Liverpool,Newcastle United,4,2,18,10,9,5,8,5,11,12,2,2,0,0,Anfield,Liverpool's relentless press overwhelmed Newcastle after the break.
+2024-01-14,EPL,2023/24,Arsenal,Crystal Palace,5,0,20,4,12,1,9,2,8,16,0,3,0,1,Emirates Stadium,Arsenal's biggest win of the season. A statement performance from Arteta's side.
+2024-01-31,EPL,2023/24,Manchester City,Burnley,3,1,21,6,11,3,10,3,8,14,0,2,0,0,Etihad Stadium,Routine City win. Haaland ended a seven-game league drought.
+2024-02-03,EPL,2023/24,Arsenal,Liverpool,3,1,16,11,8,5,8,6,10,12,1,2,0,0,Emirates Stadium,Decisive Arsenal performance secured top spot temporarily. Bukayo Saka was outstanding.
+2024-02-10,EPL,2023/24,Tottenham,Brighton,2,1,14,12,7,6,7,7,12,11,2,2,0,0,Tottenham Hotspur Stadium,Spurs late winner sparked scenes of relief. Postecoglou's side grinding out results.
+2024-02-17,EPL,2023/24,Chelsea,Wolves,4,2,14,9,7,5,7,5,13,11,2,2,0,0,Stamford Bridge,Palmer hat-trick fired Chelsea up the table. Encouraging form under new management.
+2024-02-25,EPL,2023/24,Manchester City,Chelsea,1,1,17,10,8,5,8,5,10,12,1,2,0,0,Etihad Stadium,Chelsea ended City's long unbeaten home run. Palmer again the key man for the visitors.
+2024-03-02,EPL,2023/24,Arsenal,Newcastle United,5,0,21,6,12,2,9,2,8,15,0,3,0,1,Emirates Stadium,Arguably Arsenal's best performance of the season. Havertz and Saka both scored twice.
+2024-03-09,EPL,2023/24,Liverpool,Manchester City,1,1,14,16,6,8,7,8,12,10,2,1,0,0,Anfield,Title-decider draw. Both sides had chances to win in a tense finale.
+2024-03-16,EPL,2023/24,Aston Villa,Arsenal,0,2,9,16,3,8,5,8,15,9,1,2,0,0,Villa Park,Arsenal's late goals secured all three points in a scrappy encounter.
+2024-03-30,EPL,2023/24,Manchester City,Arsenal,0,0,16,14,7,6,8,8,9,11,2,2,0,0,Etihad Stadium,Goalless but compelling title clash. Arsenal's point enough to stay top on goal difference.
+2024-04-06,EPL,2023/24,Tottenham,Arsenal,3,2,14,15,7,8,8,9,13,11,2,2,0,0,Tottenham Hotspur Stadium,North London derby thriller. Arsenal's late goal disallowed by VAR in controversial finish.
+2024-04-14,EPL,2023/24,Liverpool,Crystal Palace,2,0,17,7,9,3,8,3,11,14,1,2,0,0,Anfield,Liverpool maintained pressure at the top. Salah milestone goal in second half.
+2024-04-21,EPL,2023/24,Arsenal,Chelsea,5,0,20,7,12,3,9,3,8,15,0,3,0,1,Emirates Stadium,Emphatic statement as Arsenal crushed a demoralised Chelsea side. Title race still alive.
+2024-04-28,EPL,2023/24,Manchester City,Nottingham Forest,2,0,19,5,10,2,8,2,9,14,0,3,0,0,Etihad Stadium,City edged closer to retaining their title with routine victory.
+2024-05-04,EPL,2023/24,Liverpool,Tottenham,4,2,19,11,10,5,9,6,10,12,2,2,0,0,Anfield,Liverpool's farewell tribute season. Klopp's last home wins continued.
+2024-05-11,EPL,2023/24,Arsenal,Everton,1,1,16,8,7,4,8,5,11,12,1,2,0,0,Emirates Stadium,Arsenal needed a win but were held by a resolute Everton. Title hopes fading.
+2024-05-11,EPL,2023/24,Manchester City,Wolverhampton,3,2,18,10,9,5,8,6,10,11,2,2,0,0,Etihad Stadium,City survived a scare to claim the title. Last-day drama at the Etihad.
+2023-09-09,FIFA Qualifiers,2023/24,England,Ukraine,2,0,15,8,8,3,7,3,11,14,1,2,0,0,Wembley Stadium,England comfortable winners. Bellingham dictated from midfield.
+2023-10-13,FIFA Qualifiers,2023/24,England,Italy,3,1,16,9,8,4,8,4,10,12,2,2,0,0,Wembley Stadium,England thrashed Italy to all-but qualify for Euro 2024.
+2023-10-17,FIFA Qualifiers,2023/24,France,Netherlands,2,1,15,11,7,5,7,6,12,11,2,2,0,0,Stade de France,France qualified for Euro 2024. Mbappe at his mercurial best.
+2023-10-15,FIFA Qualifiers,2023/24,Germany,United States,3,1,17,10,9,4,8,4,10,12,2,2,0,0,Volksparkstadion,Germany tuned up with a convincing friendly win against the United States.
+2023-11-17,FIFA Qualifiers,2023/24,Spain,Georgia,3,1,18,7,10,3,9,3,8,14,0,3,0,0,La Cartuja,Spain eased through qualifying. Morata led the line with authority.
+2024-03-23,International Friendly,2023/24,Brazil,England,1,0,14,13,6,6,7,7,13,12,2,2,0,0,Wembley Stadium,Brazil edged a friendly at Wembley. Both sides rotated heavily.
+2024-03-26,International Friendly,2023/24,France,Germany,0,2,11,15,4,8,5,9,14,10,2,2,0,0,Groupama Stadium,Germany dominated France in a morale-boosting display ahead of the tournament.
+2024-06-14,UEFA Euro 2024,2024,Germany,Scotland,5,1,22,6,12,3,10,2,8,17,0,4,0,1,Allianz Arena,Germany stunned Scotland in the tournament opener. Wirtz and Musiala dazzled.
+2024-06-15,UEFA Euro 2024,2024,Spain,Croatia,3,0,18,8,10,3,9,3,8,14,0,3,0,0,Olympiastadion Berlin,Spain looked like serious contenders. Yamal and Nico Williams outstanding.
+2024-06-17,UEFA Euro 2024,2024,England,Serbia,1,0,12,9,5,4,6,5,12,13,2,2,0,0,Arena AufSchalke,Bellingham's header settled a nervy England opener against Serbia.
+2024-06-17,UEFA Euro 2024,2024,France,Austria,1,0,15,8,7,3,7,4,12,14,1,2,0,0,Dusseldorf Arena,France's only goal was an own goal. Mbappe broke his nose in the contest.
+2024-06-20,UEFA Euro 2024,2024,Spain,Italy,1,0,16,10,8,4,8,5,11,12,2,2,0,0,Allianz Arena,Spain edged defending champions Italy in the group stage showdown.
+2024-06-21,UEFA Euro 2024,2024,England,Denmark,1,1,13,11,6,5,7,6,12,11,2,2,0,0,Frankfurt Stadium,England were frustrated by a well-organised Danish side. Calls for tactical change grew.
+2024-06-25,UEFA Euro 2024,2024,Germany,Switzerland,4,1,19,9,11,4,9,4,9,13,1,3,0,0,Frankfurt Stadium,Germany demolished Switzerland in a dominant display to top Group A.
+2024-06-26,UEFA Euro 2024,2024,Spain,Albania,1,0,17,7,9,3,8,3,8,14,0,3,0,0,Dusseldorf Arena,Spain won the group comfortably but were made to work hard by Albania.
+2024-06-30,UEFA Euro 2024,2024,England,Slovakia,2,1,15,9,8,4,7,5,11,13,2,2,0,0,Arena AufSchalke,Dramatic extra-time comeback. Bellingham's bicycle kick saved England.
+2024-07-01,UEFA Euro 2024,2024,Spain,Georgia,4,1,20,8,11,3,9,3,8,15,0,3,0,0,Cologne Stadium,Georgia's fairy-tale run ended at the hands of a magnificent Spain.
+2024-07-05,UEFA Euro 2024,2024,Spain,Germany,2,1,16,15,8,7,8,8,11,10,2,2,0,0,Stuttgart Arena,Spain ended host nation Germany's tournament in extra time. Mbappe missed the match injured. A magnificent quarter-final.
+2024-07-06,UEFA Euro 2024,2024,England,Switzerland,1,1,14,13,6,6,7,7,12,11,2,2,0,0,Dusseldorf Arena,England scraped through on penalties. Pickford was the hero in the shoot-out.
+2024-07-09,UEFA Euro 2024,2024,Spain,France,2,1,17,12,9,6,8,7,10,12,2,2,0,0,Munich Stadium,Spain reached the Euro 2024 final with a comeback win over France. Lamine Yamal scored a stunning equaliser aged 16.
+2024-07-10,UEFA Euro 2024,2024,England,Netherlands,2,1,14,14,7,7,7,8,11,11,2,2,0,0,Dortmund Stadium,England came from behind to reach the final. Watkins scored a dramatic winner in stoppage time.
+2024-07-14,UEFA Euro 2024,2024,Spain,England,2,1,16,13,8,6,8,7,10,12,2,2,0,0,Olympiastadion Berlin,Spain won Euro 2024 in a pulsating final. Oyarzabal scored the winner deep into the second half.
+2023-09-19,UEFA Champions League,2023/24,Manchester City,Red Star Belgrade,3,1,19,7,10,3,9,3,9,14,0,2,0,0,Etihad Stadium,City cruised through in their UCL opener. Haaland opened his UCL account for the season.
+2023-09-20,UEFA Champions League,2023/24,Arsenal,PSV Eindhoven,4,0,18,6,10,2,9,2,8,15,0,3,0,0,Emirates Stadium,Dominant Arsenal. Leandro Trossard scored twice in his first UCL start.
+2023-10-03,UEFA Champions League,2023/24,Arsenal,Lens,2,0,15,8,8,3,7,4,12,14,1,2,0,0,Emirates Stadium,Arsenal kept their 100% UCL record intact. Gabriel scored from a set piece.
+2023-10-04,UEFA Champions League,2023/24,Manchester City,Young Boys,3,0,20,6,11,2,10,2,8,15,0,3,0,0,Etihad Stadium,City's dominance was total. A perfect performance.
+2023-10-24,UEFA Champions League,2023/24,Arsenal,Sevilla,2,0,16,7,8,3,7,4,11,13,1,2,0,0,Emirates Stadium,Arsenal maintained their perfect UCL start. Saka scored and assisted.
+2023-11-28,UEFA Champions League,2023/24,Manchester City,Leipzig,3,2,17,12,9,6,8,7,10,11,2,2,0,0,Etihad Stadium,City made hard work of it before pulling clear late on.
+2024-02-13,UEFA Champions League,2023/24,Arsenal,Porto,1,0,14,10,7,4,7,5,12,12,2,2,0,0,Emirates Stadium,Arsenal navigated a tough Porto side on the away goals rule after a tense round-of-16 tie.
+2024-03-12,UEFA Champions League,2023/24,Manchester City,Copenhagen,3,1,20,7,11,3,9,3,8,14,0,2,0,0,Etihad Stadium,City eased into the quarters with a dominant second-leg performance.
+2024-04-09,UEFA Champions League,2023/24,Arsenal,Bayern Munich,2,2,13,15,6,8,7,8,12,10,2,2,0,0,Emirates Stadium,Arsenal held Bayern at the Emirates but ultimately went out. Heartbreak in north London.
+2024-04-17,UEFA Champions League,2023/24,Manchester City,Real Madrid,1,1,14,14,6,7,7,8,11,10,2,2,0,0,Etihad Stadium,City and Real Madrid played out a tense draw before Real triumphed over two legs.
+2022-08-05,EPL,2022/23,Arsenal,Crystal Palace,2,0,14,9,7,3,7,4,12,14,1,2,0,0,Emirates Stadium,Arsenal began their title challenge with a solid home win. Saka set up both goals.
+2022-08-06,EPL,2022/23,Manchester City,West Ham,2,0,18,8,9,3,9,3,9,14,0,2,0,0,Etihad Stadium,City comfortable in their opener. Haaland made his competitive debut for the club.
+2022-08-07,EPL,2022/23,Liverpool,Fulham,2,2,16,11,8,5,8,6,11,13,2,2,0,0,Anfield,Klopp frustrated as Fulham earned a point. Darwin Nunez started his Liverpool career from the bench.
+2022-08-13,EPL,2022/23,Arsenal,Leicester City,4,2,17,11,9,5,8,5,10,12,2,2,0,0,Emirates Stadium,Arsenal ran riot. Gabriel Jesus scored twice on his home debut.
+2022-09-04,EPL,2022/23,Arsenal,Aston Villa,2,1,14,10,7,5,7,6,12,11,2,2,0,0,Emirates Stadium,Arsenal extended their 100% start. Mikel Arteta praised his side's mentality.
+2022-09-03,EPL,2022/23,Manchester City,Nottingham Forest,6,0,24,4,13,1,10,2,7,17,0,4,0,1,Etihad Stadium,Haaland scored a hat-trick as Forest were overwhelmed. A statement from the champions.
+2022-10-01,EPL,2022/23,Arsenal,Tottenham,3,1,15,10,8,4,8,5,11,11,2,2,0,0,Emirates Stadium,Arsenal dominated the North London Derby. Partey and Saka were exceptional.
+2022-10-02,EPL,2022/23,Manchester City,Manchester United,6,3,20,12,11,6,9,6,10,10,2,2,0,0,Etihad Stadium,City demolished United in a stunning derby. Haaland scored a hat-trick.
+2022-10-09,EPL,2022/23,Liverpool,Manchester City,1,0,13,17,5,8,6,9,13,10,2,2,0,0,Anfield,Liverpool's rare win over City. A massive result in the title race.
+2022-11-12,EPL,2022/23,Arsenal,Chelsea,1,0,13,11,6,5,7,6,12,11,2,2,0,0,Emirates Stadium,Arsenal maintained top spot with a hard-fought victory. Gabriel headed the winner.
+2022-11-06,EPL,2022/23,Manchester City,Fulham,2,1,17,9,9,4,8,4,10,12,1,2,0,0,Etihad Stadium,City's narrow win was not a convincing performance. Haaland was the difference.
+2023-01-15,EPL,2022/23,Arsenal,Manchester United,3,2,14,12,7,6,7,7,12,11,2,2,0,0,Emirates Stadium,Arsenal's resilience was tested but Arteta's side held on to keep their title charge on track.
+2023-01-22,EPL,2022/23,Manchester City,Tottenham,4,2,18,12,10,6,9,6,10,11,2,2,0,0,Etihad Stadium,Haaland at his devastating best. Spurs had no answer to City's relentless attacking.
+2023-03-01,EPL,2022/23,Arsenal,Everton,4,0,20,5,11,2,9,2,8,16,0,3,0,1,Emirates Stadium,Arsenal destroyed Everton. The title race was entirely in their own hands.
+2023-03-04,EPL,2022/23,Liverpool,Wolverhampton,2,0,16,9,8,4,8,4,11,13,1,2,0,0,Anfield,Back-to-back wins lifted Liverpool up the table after a dismal run of form.
+2023-04-26,EPL,2022/23,Arsenal,Chelsea,3,1,15,10,8,5,8,5,11,11,2,2,0,0,Emirates Stadium,Arsenal's comfortable win came too late to save the title. The gap to City was already insurmountable.
+2023-05-24,EPL,2022/23,Manchester City,Chelsea,1,0,17,9,9,4,8,4,10,12,1,2,0,0,Etihad Stadium,City clinched the title with a win. Haaland ended the season with 36 league goals.

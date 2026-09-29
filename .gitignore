@@ -1,0 +1,23 @@
+# Runtime secrets
+.env
+.env.local
+.env.*.local
+
+# Generated database
+data/football.db
+data/*.db
+
+# Node modules
+node_modules/
+
+# OS / editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Test artifacts
+test/fixtures/*.db
+coverage/
